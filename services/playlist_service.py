@@ -2,12 +2,10 @@ import sys
 import os
 import json
 
-# Adiciona o diretório pai ao path para importar messaging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from messaging import MessageBroker
 
-# Simulação de um banco de dados de playlists
 PLAYLISTS = {}
 
 def handle_async_message(ch, method, properties, body):
@@ -25,7 +23,6 @@ def handle_async_message(ch, method, properties, body):
             if user_id not in PLAYLISTS:
                 PLAYLISTS[user_id] = []
             
-            # Simplesmente adiciona a playlist. Não há verificação de duplicidade para simplificar.
             PLAYLISTS[user_id].append({"nome": playlist_name, "musicas": []})
             
             print(f" [✓] Playlist '{playlist_name}' criada para o usuário {user_id}. Playlists atuais: {PLAYLISTS.get(user_id)}")
@@ -55,7 +52,6 @@ if __name__ == "__main__":
     broker = None
     try:
         broker = MessageBroker()
-        # O serviço de playlists escuta em uma fila ligada ao 'music_events' exchange com a chave 'playlist.*'
         broker.consume_async(
             exchange_name='music_events', 
             routing_key='playlist.*', 

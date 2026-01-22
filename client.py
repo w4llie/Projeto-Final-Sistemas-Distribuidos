@@ -2,7 +2,6 @@ import sys
 import os
 import json
 
-# Adiciona o diretório pai ao path para importar gateway
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from gateway import Gateway

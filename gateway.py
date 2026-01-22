@@ -2,7 +2,6 @@ import sys
 import os
 import json
 
-# Adiciona o diretório pai ao path para importar messaging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from messaging import RpcClient, MessageBroker
@@ -13,46 +12,35 @@ class Gateway:
     aos serviços distribuídos apropriados.
     """
     def __init__(self):
-        # Cliente RPC para comunicação síncrona (Catálogo)
         self.rpc_client = RpcClient()
-        # Broker para comunicação assíncrona (Playlists, Histórico)
         self.broker = MessageBroker()
 
     def process_request(self, request):
-        """
-        Processa a requisição do cliente e a encaminha para o serviço correto.
-        """
+       
         service = request.get("servico")
         acao = request.get("acao")
         
         print(f"\n[GATEWAY] Recebida requisição para Serviço: {service}, Ação: {acao}")
 
         if service == "catalogo":
-            # Comunicação RPC (síncrona)
             if acao == "buscar_musica" or acao == "listar_catalogo":
-                # A fila RPC do serviço de catálogo é 'catalogo_rpc_queue'
                 response = self.rpc_client.call("catalogo_rpc_queue", request)
                 return response
             else:
                 return {"status": "erro", "mensagem": f"Ação RPC desconhecida para Catálogo: {acao}"}
 
         elif service == "playlist":
-            # Comunicação Assíncrona (via broker)
             if acao == "criar_playlist":
-                # Publica no exchange 'music_events' com routing key 'playlist.criar'
                 self.broker.publish_async('music_events', 'playlist.criar', request)
                 return {"status": "sucesso", "mensagem": f"Requisição de criação de playlist enviada para processamento assíncrono."}
             elif acao == "adicionar_musica":
-                # Publica no exchange 'music_events' com routing key 'playlist.adicionar'
                 self.broker.publish_async('music_events', 'playlist.adicionar', request)
                 return {"status": "sucesso", "mensagem": f"Requisição de adição de música enviada para processamento assíncrono."}
             else:
                 return {"status": "erro", "mensagem": f"Ação assíncrona desconhecida para Playlist: {acao}"}
 
         elif service == "historico":
-            # Comunicação Assíncrona (via broker)
             if acao == "reproduzir_musica":
-                # Publica no exchange 'music_events' com routing key 'reproducao.nova'
                 self.broker.publish_async('music_events', 'reproducao.nova', request)
                 return {"status": "sucesso", "mensagem": f"Evento de reprodução enviado para processamento assíncrono."}
             else:
@@ -67,8 +55,5 @@ class Gateway:
         self.broker.close()
 
 if __name__ == "__main__":
-    # O Gateway não é um processo que fica rodando continuamente neste modelo simples,
-    # ele é instanciado e usado pelo cliente para simular a comunicação.
-    # Em um cenário real, seria um servidor HTTP/gRPC.
     print("O Gateway é uma classe utilitária neste exemplo e não um processo autônomo.")
     print("Ele será instanciado pelo client.py.")

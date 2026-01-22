@@ -3,12 +3,10 @@ import os
 import json
 from datetime import datetime
 
-# Adiciona o diretório pai ao path para importar messaging
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from messaging import MessageBroker
 
-# Simulação de um banco de dados de histórico de reprodução
 HISTORICO_REPRODUCAO = {}
 
 def handle_async_message(ch, method, properties, body):
@@ -45,7 +43,6 @@ if __name__ == "__main__":
     broker = None
     try:
         broker = MessageBroker()
-        # O serviço de histórico escuta em uma fila ligada ao 'music_events' exchange com a chave 'reproducao.*'
         broker.consume_async(
             exchange_name='music_events', 
             routing_key='reproducao.*', 
